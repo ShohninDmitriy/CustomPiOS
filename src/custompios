@@ -29,7 +29,11 @@ function execute_chroot_script() {
   cp ${CUSTOM_PI_OS_PATH}/common.sh common.sh
   chmod 755 common.sh
   
-  chroot . usr/bin/qemu-arm-static /bin/bash /chroot_script
+  if [ -f /.dockerenv ] && [ $(arch) != "armv7l" ] ; then
+    chroot . usr/bin/qemu-arm-static /bin/bash /chroot_script
+  else
+    chroot . /bin/bash /chroot_script
+  fi
   
   # Handle exported items
   if [ -d "custompios_export" ]; then
@@ -120,7 +124,7 @@ pushd $BASE_WORKSPACE
     CHROOT_SCRIPT=${BASE_WORKSPACE}/chroot_script
     python3 ${CUSTOM_PI_OS_PATH}/execution_order.py "${MODULES}" ${CHROOT_SCRIPT}
     export -f execute_chroot_script
-    ${CHROOT_SCRIPT}
+    bash -x "${CHROOT_SCRIPT}"
     
     
     # if building a variant, execute its post-chroot script

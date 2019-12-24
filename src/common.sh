@@ -125,15 +125,20 @@ function unpack() {
   then
     owner=$3
   fi
-
+  mkdir -p /tmp/unpack/
   # $from/. may look funny, but does exactly what we want, copy _contents_
   # from $from to $to, but not $from itself, without the need to glob -- see 
   # http://stackoverflow.com/a/4645159/2028598
-  cp -v -r --preserve=mode,timestamps $from/. $to
+  cp -v -r --preserve=mode,timestamps $from/. /tmp/unpack/
+  
   if [ -n "$owner" ]
   then
-    chown -hR $owner:$owner $to
+    chown -hR $owner:$owner /tmp/unpack/
   fi
+
+  cp -v -r --preserve=mode,ownership,timestamps /tmp/unpack/. $to
+  rm -r /tmp/unpack
+
 }
 
 function detach_all_loopback(){
@@ -142,6 +147,12 @@ function detach_all_loopback(){
   for img in $(losetup  | grep $1 | awk '{ print $1 }' );  do
     losetup -d $img
   done
+}
+
+function test_for_image(){
+  if [ ! -f "$1" ]; then
+    echo "Warning, can't see image file: $image"
+  fi
 }
 
 function mount_image() {
@@ -256,6 +267,7 @@ p
 w
 FDISK
   detach_all_loopback $image
+  test_for_image $image
   LODEV=$(losetup -f --show -o $offset $image)
   trap 'losetup -d $LODEV' EXIT
 
@@ -280,6 +292,7 @@ function shrink_ext() {
   offset=$(($start*512))
 
   detach_all_loopback $image
+  test_for_image $image
   LODEV=$(losetup -f --show -o $offset $image)
   trap 'losetup -d $LODEV' EXIT
 
@@ -316,6 +329,7 @@ FDISK
 
   echo "Resizing filesystem ..."
   detach_all_loopback $image
+  test_for_image $image
   LODEV=$(losetup -f --show -o $offset $image)
   trap 'losetup -d $LODEV' EXIT
 
@@ -338,6 +352,7 @@ function minimize_ext() {
   offset=$(($start*512))
 
   detach_all_loopback $image
+  test_for_image $image
   LODEV=$(losetup -f --show -o $offset $image)
   trap 'losetup -d $LODEV' EXIT
 

@@ -27,6 +27,11 @@ fi
 cat /etc/wpa_supplicant/wpa_supplicant.conf >> ${DIST_NETWORK_FILE}  # append distributed conf to our own
 rm -f /etc/wpa_supplicant/wpa_supplicant.conf                        # remove distributed conf
 
+if [ "${BASE_DISTRO}" == "raspbian" ]; then
+    # Workaround rfkill not unblocking on boot
+    rm /var/lib/systemd/rfkill/*
+fi
+
 # create symlink
 if [ "${BASE_DISTRO}" == "ubuntu" ]; then
     mkdir -p /etc/wpa_supplicant

@@ -106,8 +106,12 @@ function gitclone(){
   then
     repo_dir=$(echo ${repo_dir} | sed 's%^.*/\([^/]*\)\(\.git\)?$%\1%g')
   fi
-
-  sudo -u "${BASE_USER}" git clone $clone_params "$build_repo" "$repo_dir"
+  
+  if [ "$repo_dir" == "" ]; then
+      sudo -u "${BASE_USER}" git clone $clone_params "$build_repo"
+  else
+      sudo -u "${BASE_USER}" git clone $clone_params "$build_repo" "$repo_dir"
+  fi
 
   if [ "$build_repo" != "$ship_repo" ]
   then
@@ -149,7 +153,9 @@ function detach_all_loopback(){
   # Cleans up mounted loopback devices from the image name
   # NOTE: it might need a better way to grep for the image name, its might clash with other builds
   for img in $(losetup  | grep $1 | awk '{ print $1 }' );  do
-    losetup -d $img
+    if [[ -f $img ]]; then
+    	losetup -d $img
+    fi
   done
 }
 

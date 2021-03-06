@@ -35,5 +35,10 @@ if [ "${BASE_DISTRO}" == "ubuntu" ];then
 fi
 
 #cleanup
+sudo systemctl disable hciuart.service
+sudo systemctl disable bluealsa.service
+sudo systemctl disable bluetooth.service
+sudo apt-get purge bluez -y
+sudo apt-get istall mc -y
 apt-get clean
 apt-get autoremove -y

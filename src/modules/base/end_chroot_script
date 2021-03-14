@@ -39,6 +39,6 @@ systemctl disable hciuart.service
 systemctl disable bluealsa.service
 systemctl disable bluetooth.service
 apt-get purge bluez -y
-apt-get istall mc -y
+apt-get install mc -y
 apt-get clean
 apt-get autoremove -y
